@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="description" content="NeuroQuest Pro - Luxury Cognitive Assessment Platform" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  <title>NeuroQuest Pro | Cognitive Excellence</title>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+  <script>
+    // Background Particles
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.size = Math.random() * 2.5 + 1.0;
+        this.speedX = (Math.random() - 0.5) * 0.4;
+        this.speedY = (Math.random() - 0.5) * 0.4;
+        this.opacity = Math.random() * 0.7 + 0.3;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0 || this.x > width) this.speedX *= -1;
+        if (this.y < 0 || this.y > height) this.speedY *= -1;
+      }
+      draw() {
+        // Bright core
+        ctx.fillStyle = `rgba(242, 227, 198, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Soft outer glow
+        ctx.fillStyle = `rgba(212, 175, 55, ${this.opacity * 0.3})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 150; i++) particles.push(new Particle());
+
+    // Custom Cursor
+    const dot = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let ringX = mouseX;
+    let ringY = mouseY;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+    });
+
+    document.addEventListener('mouseover', (e) => {
+      if(e.target.closest('button, a, input, .cursor-hover')) {
+        ring.classList.add('hovering');
+        dot.classList.add('hovering');
+      } else {
+        ring.classList.remove('hovering');
+        dot.classList.remove('hovering');
+      }
+    });
+
+    function animate() {
+      // Draw background
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => { p.update(); p.draw(); });
+
+      // Cursor physics
+      ringX += (mouseX - ringX) * 0.15;
+      ringY += (mouseY - ringY) * 0.15;
+      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+      
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    document.addEventListener('mousedown', () => {
+      ring.classList.add('clicking');
+      dot.classList.add('clicking');
+    });
+    document.addEventListener('mouseup', () => {
+      ring.classList.remove('clicking');
+      dot.classList.remove('clicking');
+    });
+  </script>
+</body>
+</html>
